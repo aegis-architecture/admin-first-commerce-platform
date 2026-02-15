@@ -7,6 +7,18 @@
 
 ---
 
+## System Context Diagram (C4 Level 1)
+
+![System Context - Admin-First AI-Embedded Commerce Platform](./images/c4-level1-context.png)
+
+*System Context Diagram showing:*
+- **Admin** (Person): Non-technical founder who configures website, products, payments, themes, and approves AI suggestions
+- **Public Visitor** (Person): End user who browses content and completes purchases
+- **Admin-First Commerce Platform** (Software System): Deterministic commerce system with embedded AI advisory layer
+- **Payment Gateway** (Software System): Handles payment authorization, capture, and confirmation (Stripe, Paystack, Flutterwave)
+- **Email Provider** (Software System): Sends transactional notifications such as order confirmations and inquiries
+- **AI Model Provider** (Software System): Executes language model inference for advisory content suggestions
+
 ## 1️⃣ SYSTEM BOUNDARY STATEMENT
 
 The system is a **single-tenant, admin-first website and commerce platform** that:
