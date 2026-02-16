@@ -29,7 +29,7 @@ The system is architected as **admin-first** and **authority-safe**, with a stru
 - **Architecture is AI-native** from inception, designed to scale into an AI-assisted advisory system without structural refactoring
 - **Admin authority is final** - AI enhances clarity, never controls outcomes
 
-![C4 Level 1 Context View](images/c4-level1-context.png)
+![C4 Level 1 Context View](docs\images\c4-level1-context.png)
 
 ---
 
