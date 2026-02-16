@@ -1,0 +1,249 @@
+# END-TO-END TRACEABILITY & STRICT RBAC VALIDATION
+Admin-First AI-Embedded Website & Commerce Platform
+
+## 1. Purpose
+
+This document proves that:
+
+- The system is executable in runtime.
+- Authority boundaries are enforced.
+- Multi-site isolation is guaranteed.
+- Commerce flows are deterministic.
+- AI advisory features cannot corrupt transactional logic.
+- Strict RBAC is enforced per site.
+
+If any flow below cannot execute safely, the architecture is invalid.
+
+## 2. Strict RBAC Model (Per-Site)
+
+### Entity Relationships
+
+```mermaid
+erDiagram
+    AdminAccount ||--o{ AdminSiteMembership : has
+    Site ||--o{ AdminSiteMembership : scoped_to
+    Role ||--o{ AdminSiteMembership : assigned
+
+    Role ||--o{ RolePermission : contains
+    Permission ||--o{ RolePermission : mapped_to
+```
+
+### Key Properties
+
+- Roles are scoped per site.
+- Permissions are granular.
+- No global super-admin bypass.
+
+All admin actions require:
+1. Authentication
+2. Site resolution
+3. Membership validation
+4. Permission verification
+
+## 3. End-to-End Flow 1 — Visitor Purchase (Custom Domain)
+
+### Scenario
+
+Visitor accesses: https://brand.com
+
+### Runtime Sequence
+
+```mermaid
+sequenceDiagram
+    actor Visitor
+    participant PublicWeb
+    participant API
+    participant SiteResolver
+    participant CommerceEngine
+    participant Integration
+    participant PaymentGateway
+    participant Database
+
+    Visitor->>PublicWeb: Load brand.com
+    PublicWeb->>API: Request homepage
+    API->>SiteResolver: Resolve domain → site_id
+    SiteResolver-->>API: site_id
+
+    Visitor->>PublicWeb: Checkout
+    PublicWeb->>API: Start Checkout
+    API->>CommerceEngine: Create Pending_Payment Order
+    CommerceEngine->>Database: Persist Order (site_id enforced)
+
+    API->>Integration: Create Payment Session
+    Integration->>PaymentGateway: Request Payment
+
+    PaymentGateway-->>Integration: Webhook Authorized
+    Integration->>CommerceEngine: Validated Payment Event
+    CommerceEngine->>Database: Transition to Confirmed
+```
+
+### Architectural Guarantees
+
+- Tenant resolved before any query.
+- Order always stored with site_id.
+- Payment cannot confirm without validated webhook.
+- AI does not participate in commerce path.
+- Integration layer cannot mutate order state directly.
+
+## 4. End-to-End Flow 2 — Admin Content Edit with AI (Strict RBAC)
+
+### Required Permissions
+
+- MANAGE_CONTENT
+- APPROVE_AI_SUGGESTIONS
+
+### Runtime Sequence
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant AdminWeb
+    participant API
+    participant Auth
+    participant SiteResolver
+    participant RBAC
+    participant AIService
+    participant Database
+
+    Admin->>AdminWeb: Request AI Suggestion
+    AdminWeb->>API: Suggestion Request
+
+    API->>Auth: Validate Token
+    API->>SiteResolver: Resolve site_id
+    API->>RBAC: Check APPROVE_AI_SUGGESTIONS
+
+    RBAC-->>API: Permission Granted
+
+    API->>AIService: Generate Suggestion
+    AIService->>Database: Store AISuggestion (site_id)
+
+    Admin->>AdminWeb: Approve Suggestion
+    AdminWeb->>API: Approve Request
+
+    API->>RBAC: Verify MANAGE_CONTENT
+    API->>Database: Create New PageVersion
+```
+
+### Architectural Guarantees
+
+- Suggestion stored separately from canonical content.
+- No direct mutation without approval.
+- All suggestions scoped by site_id.
+- AI cannot bypass RBAC.
+- Approval creates versioned content.
+
+## 5. End-to-End Flow 3 — RBAC Denial Case
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant API
+    participant RBAC
+
+    Admin->>API: Attempt Integration Config Update
+    API->>RBAC: Check MANAGE_INTEGRATIONS
+
+    RBAC-->>API: Denied
+    API-->>Admin: 403 Forbidden
+```
+
+### Guarantee
+
+- No silent downgrade.
+- No partial execution.
+- No privilege escalation.
+
+## 6. Multi-Site Isolation Enforcement
+
+### Scenario
+
+Admin belongs to two sites.
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant API
+    participant SiteResolver
+    participant MembershipService
+
+    Admin->>API: Access siteA.dashboard.com
+    API->>SiteResolver: Resolve site_id_A
+    API->>MembershipService: Verify membership(site_id_A)
+    MembershipService-->>API: Valid
+
+    Admin->>API: Access siteB.dashboard.com
+    API->>SiteResolver: Resolve site_id_B
+    API->>MembershipService: Verify membership(site_id_B)
+    MembershipService-->>API: Valid
+```
+
+### Enforcement Rule
+
+All database queries must include:
+```
+WHERE site_id = resolved_site_context
+```
+
+Cross-site queries are forbidden.
+
+## 7. Authority Enforcement Pipeline
+
+```mermaid
+flowchart TD
+    Request --> Auth
+    Auth --> SiteResolution
+    SiteResolution --> MembershipCheck
+    MembershipCheck --> RoleLookup
+    RoleLookup --> PermissionCheck
+
+    PermissionCheck -->|Allowed| ControllerExecution
+    PermissionCheck -->|Denied| AccessDenied
+```
+
+### Invariants
+
+- No request bypasses RBAC.
+- No controller executes before permission validation.
+- No cross-tenant execution.
+- No AI execution without explicit permission.
+
+## 8. Failure Containment Summary
+
+| Failure Type | Containment | Blast Radius |
+|--------------|-------------|--------------|
+| Payment Gateway Failure | Order remains Pending or Failed | Single Order |
+| AI Service Failure | Advisory Disabled | Admin UX Only |
+| Email Failure | Retry Queue | Notification Only |
+| RBAC Failure | 403 Response | Single Request |
+| Site Resolution Failure | 404 or 403 | Single Request |
+
+No failure may:
+- Corrupt order state
+- Leak cross-site data
+- Escalate privileges
+- Mutate canonical data silently
+
+## 9. Architectural Integrity Checklist
+
+✔ Deterministic commerce  
+✔ Advisory AI isolated  
+✔ Strict per-site RBAC  
+✔ Tenant-aware data enforcement  
+✔ Versioned content mutation  
+✔ Validated payment transitions  
+✔ Explicit authority chain  
+✔ Failure containment defined  
+
+## 10. Conclusion
+
+This system:
+
+- Is executable in runtime.
+- Is multi-site ready.
+- Enforces strict RBAC.
+- Preserves commerce determinism.
+- Embeds AI safely as advisory-only.
+- Prevents authority leakage.
+- Prevents cross-tenant data corruption.
+
+If any future change violates these guarantees, the architecture must be revised before implementation.

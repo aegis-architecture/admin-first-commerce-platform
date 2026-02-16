@@ -19,6 +19,8 @@ Level 3 refines the containers into internal components. Each component represen
 
 ### Components
 
+![Application API Components](images/APPLICATION-API-COMPONENTS.png)
+
 - **Auth & Identity Resolver**: Handles JWT validation, session management, and RBAC resolution.
 - **Site Context Resolver**: Resolves `site_id` from headers/tokens and enforces tenant isolation at the request entry point.
 - **Content Controller**: Orchestrates CMS operations, versioning, and approval workflows.
@@ -38,6 +40,8 @@ Level 3 refines the containers into internal components. Each component represen
 
 ### Components
 
+![Commerce Engine Components](images/COMMERCE-ENGINE-COMPONENTS.png)
+
 - **Cart Manager**: Manages cart persistence, item validation, and quantity limits.
 - **Order Lifecycle Manager**: Deterministic state machine enforcing order state transitions.
 - **Payment State Handler**: Exclusively handles transitions related to payment status (Authorized, Failed).
@@ -52,6 +56,8 @@ Level 3 refines the containers into internal components. Each component represen
 **Responsibilities**: Prompt construction, suggestion validation, persistence, audit logging.
 
 ### Components
+
+![AI Advisory Service Components](images/AI-ADVISORY-SERVICE-COMPONENTS.png)
 
 - **AI Toggle Guard**: Non-negotiable gatekeeper that checks system/tenant-level AI status before any operation.
 - **Prompt Builder**: Constructs safe, context-aware prompts for the LLM based on system domain rules.
@@ -68,6 +74,8 @@ Level 3 refines the containers into internal components. Each component represen
 **Responsibilities**: Payment sessions, webhook validation, email dispatch, credential security.
 
 ### Components
+
+![Integration Orchestrator Components](images/INTEGRATION-ORCHESTRATOR-COMPONENTS.png)
 
 - **Payment Session Manager**: Creates and manages sessions with external payment gateways (e.g., Stripe, PayPal).
 - **Webhook Validator**: Validates cryptographic signatures of incoming webhooks from external providers.
