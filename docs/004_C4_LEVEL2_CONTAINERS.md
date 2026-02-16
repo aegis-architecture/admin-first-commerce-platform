@@ -14,6 +14,10 @@ The Admin-First Commerce Platform decomposes into seven distinct containers, eac
 
 ---
 
+![C4 Level 2 Containers](images/C4_LEVEL2_CONTAINERS.png)
+
+---
+
 ## Container Responsibility Strategy
 
 We divide by responsibility domains, not by technical layer:
